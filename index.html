@@ -220,10 +220,9 @@
         <section id="home" class="page-section active">
             <!-- Banner -->
             <div class="banner-container">
-                <!-- Using a placeholder video since BannerHeader.mp4 doesn't exist here. 
-                     It is muted, loops, and autoplays. -->
-                <video class="banner-video" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/222/FFF?text=BannerHeader.mp4">
-                    <source src="https://cdn.pixabay.com/video/2021/08/04/83866-584742798_large.mp4" type="video/mp4">
+                <!-- Pointing directly to your uploaded BannerHeader.mp4 file -->
+                <video class="banner-video" autoplay loop muted playsinline>
+                    <source src="BannerHeader.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="banner-overlay"></div>
@@ -245,7 +244,6 @@
 
             <!-- Intro Section -->
             <div class="max-w-4xl mx-auto px-4 py-8 text-center">
-                </p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
                     <div class="bg-[#2a2a2a] p-6 rounded-2xl border border-white/5">
                         <div class="bg-black/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
