@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCon '27</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #363636;
+            --dot-color: rgba(255, 255, 255, 0.15);
+            --dot-size: 2px;
+            --dot-space: 24px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .dotted-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none; /* Let clicks pass through to content */
+        }
+
+        .dot {
+            position: absolute;
+            background-color: var(--dot-color);
+            border-radius: 50%;
+            width: var(--dot-size);
+            height: var(--dot-size);
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s ease;
+        }
+
+        /* Navigation styling */
+        .glass-nav {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #2a2a2a;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .dropdown:hover .dropdown-content,
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            color: #e5e5e5;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s, color 0.2s;
+            border-radius: 0.5rem;
+            margin: 4px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #3f3f3f;
+            color: white;
+        }
+
+        /* Page transitions */
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Banner styling */
+        .banner-container {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            min-height: 400px;
+            background-color: #1a1a1a; /* Fallback */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            object-fit: cover;
+            opacity: 0.6;
+            z-index: 0;
+        }
+        
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(54, 54, 54, 0.2), var(--bg-color));
+            z-index: 1;
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Roblox button */
+        .btn-roblox {
+            background-color: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-roblox:hover {
+            background-color: #1a1a1a;
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dotted-background" id="dotContainer"></div>
+
+    <nav class="glass-nav fixed w-full top-0 z-50 transition-all duration-300 py-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-12">
+                <!-- Logo -->
+                <div class="flex-shrink-0 cursor-pointer" onclick="showPage('home')">
+                    <img class="h-12 w-auto transform scale-150 origin-left" src="https://i.imgur.com/Lawz4OZ.png" alt="DevCon 27 Logo" onerror="this.src='https://placehold.co/120x40/222/FFF?text=DevCon+27'">
+                </div>
+
+                <!-- Right Side - Roblox Login & More Dropdown -->
+                <div class="flex items-center space-x-6">
+                    
+                    <!-- Roblox Login Button (Simulated) -->
+                    <button onclick="simulateRobloxLogin()" id="loginBtn" class="btn-roblox hidden md:flex items-center space-x-2 text-white font-semibold py-2 px-4 rounded-lg">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.388 0L0 21.036L18.612 24L24 2.964L5.388 0ZM10.518 15.696L7.14 15.156L8.004 11.58L11.382 12.12L10.518 15.696Z"/>
+                        </svg>
+                        <span>Link Account</span>
+                    </button>
+                    <div id="userProfile" class="hidden flex items-center space-x-3 bg-black/40 py-1.5 px-3 rounded-full border border-white/10">
+                         <div class="w-8 h-8 bg-gray-600 rounded-full overflow-hidden">
+                             <img src="https://placehold.co/32x32/111/FFF?text=U" alt="User Avatar" class="w-full h-full object-cover">
+                         </div>
+                         <span class="text-sm font-semibold truncate max-w-[100px]">Developer</span>
+                    </div>
+
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown relative inline-block text-left">
+                        <button type="button" class="inline-flex justify-center items-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-transparent text-sm font-medium text-white hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#363636] focus:ring-white transition-colors" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                            More
+                            <i data-lucide="chevron-down" class="ml-2 -mr-1 h-4 w-4"></i>
+                        </button>
+
+                        <div class="dropdown-content origin-top-right mt-2" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                            <div class="py-1" role="none">
+                                <a href="#" onclick="showPage('apply')" class="dropdown-item flex items-center" role="menuitem">
+                                    <i data-lucide="store" class="mr-3 h-4 w-4 text-gray-400"></i> Apply for a stall
+                                </a>
+                                <a href="#" onclick="showPage('about')" class="dropdown-item flex items-center" role="menuitem">
+                                    <i data-lucide="info" class="mr-3 h-4 w-4 text-gray-400"></i> About the event
+                                </a>
+                                <a href="#" onclick="showPage('when')" class="dropdown-item flex items-center" role="menuitem">
+                                    <i data-lucide="calendar" class="mr-3 h-4 w-4 text-gray-400"></i> When is the event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-16"> <!-- Padding top to account for fixed nav -->
+        
+        <!-- HOME PAGE -->
+        <section id="home" class="page-section active">
+            <!-- Banner -->
+            <div class="banner-container">
+                <!-- Using a placeholder video since BannerHeader.mp4 doesn't exist here. 
+                     It is muted, loops, and autoplays. -->
+                <video class="banner-video" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/222/FFF?text=BannerHeader.mp4">
+                    <source src="https://cdn.pixabay.com/video/2021/08/04/83866-584742798_large.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="banner-overlay"></div>
+            </div>
+
+            <!-- Slogan Section -->
+            <div class="w-full text-center py-12 px-4 bg-gradient-to-b from-[#262626] to-transparent border-b border-white/5 mb-8 relative z-10">
+                <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg">
+                    DevCon, Networking at its highest.
+                </h2>
+                
+                <button onclick="simulateRobloxLogin()" class="md:hidden mt-8 btn-roblox flex items-center justify-center space-x-2 text-white font-semibold py-3 px-8 rounded-lg mx-auto text-lg w-full max-w-xs">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.388 0L0 21.036L18.612 24L24 2.964L5.388 0ZM10.518 15.696L7.14 15.156L8.004 11.58L11.382 12.12L10.518 15.696Z"/>
+                    </svg>
+                    <span>Link Account to Secure Ticket</span>
+                </button>
+            </div>
+
+            <!-- Intro Section -->
+            <div class="max-w-4xl mx-auto px-4 py-8 text-center">
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                    <div class="bg-[#2a2a2a] p-6 rounded-2xl border border-white/5">
+                        <div class="bg-black/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="shield-check" class="text-green-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-xl mb-2">Verified Entry</h3>
+                        <p class="text-sm text-gray-400">Account linking guarantees a bot-free experience.</p>
+                    </div>
+                    <div class="bg-[#2a2a2a] p-6 rounded-2xl border border-white/5">
+                        <div class="bg-black/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="users" class="text-blue-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-xl mb-2">Networking</h3>
+                        <p class="text-sm text-gray-400">Connect with top creators and industry leaders.</p>
+                    </div>
+                    <div class="bg-[#2a2a2a] p-6 rounded-2xl border border-white/5">
+                        <div class="bg-black/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="sparkles" class="text-purple-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-xl mb-2">Exclusive Panels</h3>
+                        <p class="text-sm text-gray-400">Get sneak peeks at upcoming platform features.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- APPLY PAGE -->
+        <section id="apply" class="page-section min-h-screen py-20 px-4">
+            <div class="max-w-3xl mx-auto bg-[#2a2a2a] rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                <h2 class="text-4xl font-bold mb-2 flex items-center">
+                    <i data-lucide="store" class="mr-4 text-purple-400 h-8 w-8"></i>
+                    Apply for a Stall
+                </h2>
+                <p class="text-gray-400 mb-8">Showcase your studio, tech, or community group at the main exhibition hall.</p>
+                
+                <form onsubmit="event.preventDefault(); showNotice('Application submitted securely.', 'success');" class="space-y-6 relative z-10">
+                    <div id="authOverlay" class="absolute inset-0 bg-[#2a2a2a]/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center rounded-xl border border-white/10">
+                        <i data-lucide="lock" class="h-12 w-12 text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Authentication Required</h3>
+                        <p class="text-gray-400 mb-4 text-center max-w-sm">You must link your Roblox account to apply for a stall.</p>
+                        <button type="button" onclick="simulateRobloxLogin()" class="btn-roblox flex items-center space-x-2 text-white font-semibold py-2 px-6 rounded-lg">
+                            <span>Link Account Now</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Studio / Group Name</label>
+                            <input type="text" class="w-full bg-[#1a1a1a] border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors" placeholder="e.g. Redmanta">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Roblox Group ID</label>
+                            <input type="number" class="w-full bg-[#1a1a1a] border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors" placeholder="1234567">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">What will you showcase?</label>
+                        <textarea rows="4" class="w-full bg-[#1a1a1a] border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors resize-none" placeholder="Describe your game, tool, or service..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-white text-black font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                        Submit Secure Application
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ABOUT PAGE -->
+        <section id="about" class="page-section min-h-screen py-20 px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">About DevCon</h2>
+                    <div class="w-24 h-1 bg-white mx-auto rounded-full"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <p class="text-lg text-gray-300 leading-relaxed mb-6">
+                            DevCon 27 is the ultimate convergence point for the brightest minds on the platform. Founded by developers, for developers, our mission is to foster collaboration, share cutting-edge knowledge, and celebrate the incredible creations born within the ecosystem.
+                        </p>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Security is at the heart of our event. By utilizing our proprietary bot linking system, we ensure that every ticket holder is a verified member of the community, creating a safe and authentic environment for everyone.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-[#2a2a2a] p-6 rounded-2xl text-center">
+                            <div class="text-4xl font-black text-white mb-2">50+</div>
+                            <div class="text-gray-400 text-sm uppercase tracking-wider">Speakers</div>
+                        </div>
+                        <div class="bg-[#2a2a2a] p-6 rounded-2xl text-center">
+                            <div class="text-4xl font-black text-white mb-2">20k</div>
+                            <div class="text-gray-400 text-sm uppercase tracking-wider">Sq Ft Expo</div>
+                        </div>
+                        <div class="bg-[#2a2a2a] p-6 rounded-2xl text-center col-span-2">
+                            <div class="text-4xl font-black text-white mb-2">1,500+</div>
+                            <div class="text-gray-400 text-sm uppercase tracking-wider">Verified Attendees</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHEN PAGE -->
+        <section id="when" class="page-section min-h-screen py-20 px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <i data-lucide="calendar-clock" class="h-16 w-16 text-white mx-auto mb-6"></i>
+                <h2 class="text-4xl md:text-6xl font-black mb-6 tracking-tight">July 15 - 17, 2027</h2>
+                
+                <div class="flex justify-center mb-12">
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                        Tickets Available Soon
+                    </span>
+                </div>
+
+                <div class="bg-[#2a2a2a] rounded-3xl p-8 md:p-12 border border-white/10 max-w-2xl mx-auto">
+                    <h3 class="text-2xl font-bold mb-8">Schedule Overview</h3>
+                    
+                    <div class="space-y-6 text-left relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-600 before:to-transparent">
+                        
+                        <!-- Day 1 -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#363636] bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                1
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#1a1a1a] p-4 rounded-xl border border-white/5">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-bold text-white">Friday, July 15</h4>
+                                </div>
+                                <p class="text-sm text-gray-400">Welcome Keynote, Registration, and Evening Mixer.</p>
+                            </div>
+                        </div>
+
+                        <!-- Day 2 -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#363636] bg-purple-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                2
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#1a1a1a] p-4 rounded-xl border border-white/5">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-bold text-white">Saturday, July 16</h4>
+                                </div>
+                                <p class="text-sm text-gray-400">Main Exhibition Hall opens, Technical Panels, Game Jams.</p>
+                            </div>
+                        </div>
+
+                        <!-- Day 3 -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#363636] bg-pink-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                3
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#1a1a1a] p-4 rounded-xl border border-white/5">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-bold text-white">Sunday, July 17</h4>
+                                </div>
+                                <p class="text-sm text-gray-400">Awards Ceremony, Closing Keynote, and Farewell.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Custom Alert Modal -->
+    <div id="noticeModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeNotice()"></div>
+        <div class="bg-[#2a2a2a] border border-white/10 p-6 rounded-2xl shadow-2xl relative z-10 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0" id="noticeContent">
+            <div class="flex items-center space-x-3 mb-4">
+                <div id="noticeIcon" class="p-2 rounded-full"></div>
+                <h3 class="text-xl font-bold text-white" id="noticeTitle">Notice</h3>
+            </div>
+            <p class="text-gray-300 mb-6" id="noticeMessage"></p>
+            <button onclick="closeNotice()" class="w-full bg-white text-black font-bold py-2 rounded-lg hover:bg-gray-200">Got it</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // -- Dotted Background Logic --
+        const dotContainer = document.getElementById('dotContainer');
+        const dots = [];
+        const spacing = 40; // Increased spacing for 'tiny dotted' look
+        
+        // Setup grid of dots
+        function initDots() {
+            dotContainer.innerHTML = '';
+            dots.length = 0;
+            
+            const cols = Math.floor(window.innerWidth / spacing) + 1;
+            const rows = Math.floor(window.innerHeight / spacing) + 1;
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    
+                    const x = j * spacing + (spacing / 2);
+                    const y = i * spacing + (spacing / 2);
+                    
+                    dot.style.left = `${x}px`;
+                    dot.style.top = `${y}px`;
+                    
+                    // Store position data on the element for calculations
+                    dot.dataset.x = x;
+                    dot.dataset.y = y;
+                    
+                    dotContainer.appendChild(dot);
+                    dots.push(dot);
+                }
+            }
+        }
+
+        // Handle mouse movement to scale dots
+        let mouseX = -1000;
+        let mouseY = -1000;
+        const interactionRadius = 100; // How close mouse needs to be
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            updateDots();
+        });
+
+        // Reset dots when mouse leaves window
+        document.addEventListener('mouseleave', () => {
+            mouseX = -1000;
+            mouseY = -1000;
+            updateDots();
+        });
+
+        function updateDots() {
+            // Optimization: Only update via requestAnimationFrame if needed for smoother perf, 
+            // but direct update is okay for simple scale transforms
+            for (let i = 0; i < dots.length; i++) {
+                const dot = dots[i];
+                const dx = mouseX - parseFloat(dot.dataset.x);
+                const dy = mouseY - parseFloat(dot.dataset.y);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < interactionRadius) {
+                    // Calculate scale based on distance (closer = bigger)
+                    // Max scale is 3, min is 1
+                    const scale = 1 + (2 * (1 - (distance / interactionRadius)));
+                    dot.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                    dot.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Brighter when hovered
+                } else {
+                    dot.style.transform = `translate(-50%, -50%) scale(1)`;
+                    dot.style.backgroundColor = 'var(--dot-color)';
+                }
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            initDots();
+        });
+        
+        // Initialize on load
+        initDots();
+
+
+        // -- Page Navigation Logic --
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-section');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show selected page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+
+        // -- Authentication Simulation Logic --
+        let isLoggedIn = false;
+
+        function simulateRobloxLogin() {
+            showNotice(
+                "Connecting to DevCon Bot...<br><br><span class='text-sm text-gray-400'>In a real environment, this would open an OAuth window or prompt you to join a specific Roblox verification game to link your account securely.</span>", 
+                "info", 
+                "Authentication Process"
+            );
+
+            // Simulate successful login after a short delay
+            setTimeout(() => {
+                isLoggedIn = true;
+                
+                // Update UI
+                const loginBtn = document.getElementById('loginBtn');
+                const userProfile = document.getElementById('userProfile');
+                const authOverlay = document.getElementById('authOverlay');
+                
+                if(loginBtn) loginBtn.classList.add('hidden');
+                if(userProfile) userProfile.classList.remove('hidden');
+                if(userProfile) userProfile.classList.add('flex');
+                
+                // Remove overlay on apply form
+                if(authOverlay) {
+                    authOverlay.style.opacity = '0';
+                    setTimeout(() => authOverlay.remove(), 300);
+                }
+
+                closeNotice();
+                setTimeout(() => {
+                    showNotice("Your account has been successfully linked and verified.", "success", "Welcome!");
+                }, 400);
+
+            }, 2500);
+        }
+
+        // -- Custom Notice/Modal Logic --
+        const modal = document.getElementById('noticeModal');
+        const modalContent = document.getElementById('noticeContent');
+
+        function showNotice(message, type = 'info', title = null) {
+            const msgEl = document.getElementById('noticeMessage');
+            const titleEl = document.getElementById('noticeTitle');
+            const iconEl = document.getElementById('noticeIcon');
+
+            msgEl.innerHTML = message;
+            
+            if (type === 'success') {
+                titleEl.innerText = title || "Success";
+                iconEl.innerHTML = '<i data-lucide="check-circle" class="text-white"></i>';
+                iconEl.className = 'p-2 rounded-full bg-green-500';
+            } else if (type === 'error') {
+                titleEl.innerText = title || "Error";
+                iconEl.innerHTML = '<i data-lucide="alert-triangle" class="text-white"></i>';
+                iconEl.className = 'p-2 rounded-full bg-red-500';
+            } else {
+                titleEl.innerText = title || "Information";
+                iconEl.innerHTML = '<i data-lucide="info" class="text-white"></i>';
+                iconEl.className = 'p-2 rounded-full bg-blue-500';
+            }
+            
+            lucide.createIcons();
+            
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth;
+            
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeNotice() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200); // match transition duration
+        }
+    </script>
+</body>
+</html>
